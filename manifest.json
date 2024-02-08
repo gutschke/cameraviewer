@@ -3,7 +3,7 @@
   "name": "View camera or video capture card",
   "start_url": "/cameraviewer",
   "display": "standalone",
-  "icons": [ { "src": "/camera.png", "sizes": "512x512", "type": "image/png" } ],
+  "icons": [ { "src": "camera.png", "sizes": "512x512", "type": "image/png" } ],
   "theme_color": "#c070a0",
   "background_color": "#222222"
 }
