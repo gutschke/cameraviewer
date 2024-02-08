@@ -1,0 +1,74 @@
+<html>
+  <head>
+    <title>Camera Viewer</title>
+    <link rel="manifest" href="manifest.json" />
+    <style>
+      body {
+        min-height: 100vh;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      #video {
+        object-fit: fill;
+        width: 100vw;
+        height: 100vh;
+        position: fixed;
+      }
+    </style>
+    <script>
+      window.addEventListener('DOMContentLoaded', function() {
+        let media = navigator.mediaDevices,
+            video = document.getElementById("video"),
+            constraints = { audio: false,
+                            video: { advanced: [ { width: 2560 },
+                                                 { width: 1920 },
+                                                 { width: 1280 },
+                                                 { width: 1024 },
+                                                 { width: 900  },
+                                                 { width: 800  },
+                                                 { width: 640  },
+                                                 { width: 320  },
+                                               ],
+                                     facingMode: "environment" } };
+        media.enumerateDevices().then((devices) => {
+          // Find a stream that matches our constraints. In case the
+          // "facingMode" constraint didn't work out, specify an actual
+          // deviceId as well.
+          for (dev of devices) {
+            // Prefer any camera other than the "Front Camera", but fall
+            // back on the default camera, if we can't find a good match.
+            if (dev.kind == 'videoinput' && dev.label != 'Front Camera') {
+              constraints['video']['deviceId'] = dev.deviceId;
+              break;
+            }
+          }
+          // Selecting the video resolution doesn't work correctly with
+          // all camera devices. This can cause our device identifier to be
+          // ignored. Gradually relax constraints until the browser is
+          // happy.
+          let selectConstraints = (stream) => {
+            let settings = stream.getVideoTracks()[0].getSettings();
+            if (constraints['video']['deviceId'] &&
+                constraints['video']['deviceId'] != settings.deviceId) {
+              if (constraints['video']['advanced'].shift()) {
+                return media.getUserMedia(constraints).then(selectConstraints);
+              }
+            }
+            console.log('Capturing in ' + settings.width + 'x' +
+                        settings.height + ' resolution');
+            video.srcObject = stream;
+            video.play();
+          };
+          // Show the stream from the camera.
+          media.getUserMedia(constraints).then(selectConstraints);
+        });
+      }, false);
+    </script>
+  </head>
+  <body>
+    <video id="video" autoplay></video>
+  </body>
+</html>
